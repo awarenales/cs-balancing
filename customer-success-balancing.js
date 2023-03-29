@@ -3,17 +3,55 @@
  * @param {array} customerSuccess
  * @param {array} customers
  * @param {array} customerSuccessAway
+ * @returns {number} Customer Success ID
  */
 function customerSuccessBalancing(
   customerSuccess,
   customers,
   customerSuccessAway
 ) {
-  /**
-   * ===============================================
-   * =========== Write your solution here ==========
-   * ===============================================
-   */
+  let customerDistribution = Object.fromEntries(
+    customerSuccess.map((cs) => [cs.id, 0])
+  );
+  let customerSuccessSorted = customerSuccess.sort(
+    (csa, csb) => csa.score - csb.score
+  );
+  let customersSorted = customers.sort((ca, cb) => ca.score - cb.score);
+  let unavailableCss = Object.fromEntries(
+    customerSuccessAway.map((id) => [id, true])
+  );
+
+  // assign customers to available CSs
+  for (let i = 0; i < customersSorted.length; i++) {
+    const customer = customersSorted[i];
+    for (let j = 0; j < customerSuccessSorted.length; j++) {
+      const cs = customerSuccessSorted[j];
+      if (cs.score >= customer.score && !unavailableCss[cs.id]) {
+        customerDistribution[cs.id]++;
+        break;
+      }
+    }
+  }
+
+  // console.log(customerDistribution)
+
+  // find ids of overloaded CSs
+  const lastMax = Number(
+    Object.keys(customerDistribution)[
+      Object.values(customerDistribution).lastIndexOf(
+        Math.max.apply(Math, Object.values(customerDistribution))
+      )
+    ]
+  );
+  const firstMax = Number(
+    Object.keys(customerDistribution)[
+      Object.values(customerDistribution).indexOf(
+        Math.max.apply(Math, Object.values(customerDistribution))
+      )
+    ]
+  );
+
+  return firstMax === lastMax ? firstMax : 0;
 }
 
 test("Scenario 1", () => {
@@ -51,7 +89,7 @@ function mapEntities(arr) {
   }));
 }
 
-function arraySeq(count, startAt){
+function arraySeq(count, startAt) {
   return Array.apply(0, Array(count)).map((it, index) => index + startAt);
 }
 
